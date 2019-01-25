@@ -6,8 +6,9 @@ app_name = 'temo'
 urlpatterns = [
     # ex: /polls/
     path('', views.index, name='index'),
-    # ex: /polls/5/
+    path('test/', views.test_index, name='test'),
     path('add/', views.write, name='write'),
+    path('on_click/', views.on_click, name='on_click'),
     # ex: /polls/5/results/
     # path('chart/', views.weather_chart_view, name='load_charts'),
     path('chart/data/', ChartData.as_view()),

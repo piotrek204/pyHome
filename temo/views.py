@@ -21,10 +21,24 @@ LIVE_DATA = []
 SENSOR_NAME = ['Temperatura pieca', 'Temperatura boilera', 'Temperatura zewnetrzna', 'Temperatura salon']
 SENSOR_UNIT = ['C', 'C', 'C', 'C']
 
+from django import template
+register = template.Library()
+
+
+def on_click(request):
+    print('click')
+    return HttpResponse("It was click")
+
+
 def index(request):
     latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
     context = {'latest_readings': latest_readings, 'live_data': LIVE_DATA[-1], 'data_time': timezone.now()}
     return render(request, 'temo/index.html', context)
+
+def test_index(request):
+    latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
+    context = {'latest_readings': latest_readings, 'live_data': LIVE_DATA[-1], 'data_time': timezone.now()}
+    return render(request, 'temo/test.html', context)
 
 def write(request):
     id_list = request.POST.getlist('sensor_id')

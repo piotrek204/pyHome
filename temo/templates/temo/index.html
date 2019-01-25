@@ -27,6 +27,9 @@
       <!--<a class="nav-link" href="#">Sign out</a>-->
     <!--</li>-->
   <!--</ul>-->
+    <!--<div>-->
+        <!--<input type="button" id="buttonId" name="_mail" value="Test">-->
+    <!--</div>-->
 </nav>
 
 <div class="container-fluid">
@@ -55,17 +58,21 @@
         <!--<h1 class="h2">Sterownik pieca</h1>-->
         <!--<div class="btn-toolbar mb-2 mb-md-0">-->
           <!--<div class="btn-group mr-2">-->
-            <!--<button class="btn btn-sm btn-outline-secondary">Share</button>-->
-            <!--<button class="btn btn-sm btn-outline-secondary">Export</button>-->
+            <!--<button class="btn btn-sm btn-outline-secondary" id="buttonId">Test</button>-->
+            <!--&lt;!&ndash;<button class="btn btn-sm btn-outline-secondary">Export</button>&ndash;&gt;-->
+
+            <!--&lt;!&ndash;<form action="#" method="post">&ndash;&gt;-->
+             <!--&lt;!&ndash;<input type="submit" class="btn" value="value" name="mybtn">&ndash;&gt;-->
+            <!--&lt;!&ndash;</form>&ndash;&gt;-->
+
+
           <!--</div>-->
-          <!--<button class="btn btn-sm btn-outline-secondary dropdown-toggle">-->
-            <!--<span data-feather="calendar"></span>-->
-            <!--This week-->
-          <!--</button>-->
+          <!--&lt;!&ndash;<button class="btn btn-sm btn-outline-secondary dropdown-toggle">&ndash;&gt;-->
+            <!--&lt;!&ndash;<span data-feather="calendar"></span>&ndash;&gt;-->
+            <!--&lt;!&ndash;This week&ndash;&gt;-->
+          <!--&lt;!&ndash;</button>&ndash;&gt;-->
         <!--</div>-->
       <!--</div>-->
-
-
       <div class="table-responsive">
         <table class="table table-striped table-sm">
           <thead>
@@ -240,6 +247,25 @@
 
     }
   })
+
+
+
+  var foo = 0
+  $('#buttonId').click(function() {
+    $.ajax({
+        url: '/temo/on_click/',
+        method: 'POST', // or another (GET), whatever you need
+        data: {
+            name: 'value', // data you need to pass to your function
+            click: true
+        }
+        //success: function (data) {
+            //foo: 0
+            // success callback
+            // you can process data returned by function from views.py
+        //}
+    });
+  });
 
   {% endblock %}
 </script>
