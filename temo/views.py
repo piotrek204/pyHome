@@ -67,11 +67,11 @@ def write(request):
     if len(readings_bufor) > 301:
         readings_bufor.pop(0)
 
-    if readings_bufor and readings_bufor[-1]['time'] - datetime.timedelta(seconds=5) > readings_bufor[0]['time']:
+    if readings_bufor and readings_bufor[-1]['time'] - datetime.timedelta(minutes=5) > readings_bufor[0]['time']:
         for reading in readings_bufor[-1]['readings']:  # refactor is needed
             id = [key for key, value in sensor_names.items() if value == reading['sensor_name']][0]
             sensor = Sensor.objects.get(id=id)
-            print(sensor)
+            print('sensor', sensor)
             r = Reading.objects.create(sensor=sensor, value=reading['value'])
             print(r)
         print('zapisalem do bazy')
@@ -120,7 +120,7 @@ class OutsideTempChartData(APIView):
 
     def get(self, request, format=None):
         data = 0
-        readings = Reading.objects.filter(Q(sensor_id=2) | Q(sensor_id=3) | Q(sensor_id=4)).order_by(
+        readings = Reading.objects.filter(Q(sensor_id=1) | Q(sensor_id=2) | Q(sensor_id=3)).order_by(
             '-read_date_id').values('read_date_id', 'value')[:300:12]
 
         for reading in readings:
