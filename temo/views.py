@@ -90,10 +90,10 @@ class ChartData(APIView):
 
     def get(self, request, format=None):
         # reading = Reading.objects.values_list('read_date', 'value').filter(sensor_id=2).order_by('-read_date')[:7]
-        outside_temp = Reading.objects.filter(sensor_id=4).order_by('-read_date').values()[:300:8]
+        outside_temp = Reading.objects.filter(sensor_id=3).order_by('-read_date').values()[:300:8]
         # print(outside_temp)
         heater_temp = Reading.objects.filter(sensor_id=2).order_by('-read_date').values()[:300:8]
-        boiler_temp = Reading.objects.filter(sensor_id=3).order_by('-read_date').values()[:300:8]
+        boiler_temp = Reading.objects.filter(sensor_id=1).order_by('-read_date').values()[:300:8]
 
         outside_temp_list = []
         heater_temp_list = []
