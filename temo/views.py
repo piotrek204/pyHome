@@ -42,7 +42,11 @@ def index(request):
     #     'live_data': LIVE_DATA[-1],
     #     'data_time': timezone.now()
     # }
-    return render(request, 'temo/index.html', readings_bufor[-1])
+    try:
+        context = readings_bufor[-1]
+    except:
+        pass
+    return render(request, 'temo/index.html', context)
 
 
 def test_index(request):
