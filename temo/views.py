@@ -25,7 +25,6 @@ readings_bufor = []
 sensor_names = {sensor.id: sensor.name for sensor in Sensor.objects.all()}
 sensor_units = {sensor.id: str(sensor.unit) for sensor in Sensor.objects.all()}
 
-print(sensor_units)
 
 from django import template
 register = template.Library()
@@ -37,11 +36,6 @@ def on_click(request):
 
 
 def index(request):
-    # # latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
-    # context = {
-    #     'live_data': LIVE_DATA[-1],
-    #     'data_time': timezone.now()
-    # }
     try:
         context = readings_bufor[-1]
     except:
@@ -73,30 +67,22 @@ def write(request):
     if len(readings_bufor) > 301:
         readings_bufor.pop(0)
 
-    if readings_bufor[-1]['time'] - datetime.timedelta(minutes=5) > readings_bufor[0]['time']:
-        for id, val in zip_list:  # refactor is needed
+    if readings_bufor and readings_bufor[-1]['time'] - datetime.timedelta(seconds=5) > readings_bufor[0]['time']:
+        for reading in readings_bufor[-1]['readings']:  # refactor is needed
+            id = [key for key, value in sensor_names.items() if value == reading['sensor_name']][0]
             sensor = Sensor.objects.get(id=id)
-            Reading.objects.create(sensor=sensor, value=val)
+            print(sensor)
+            r = Reading.objects.create(sensor=sensor, value=reading['value'])
+            print(r)
         print('zapisalem do bazy')
-
-    # LIVE_DATA.append(zip(value_list, SENSOR_NAME, SENSOR_UNIT))
-    #
-    # if len(LIVE_DATA) > 10:
-    #     LIVE_DATA.pop(0)
-    #
-    # read_date_dict = ReadDate.objects.order_by('-date').values()[0]
-    # if timezone.now() - datetime.timedelta(minutes=5) >= read_date_dict['date']:
-    #     for id, val in zip_list:
-    #         sensor = Sensor.objects.get(id=id)
-    #         Reading.objects.create(sensor=sensor, value=val)
-    #     print('zapisalem do bazy')
-    #         # Unit.objects.create(unit="%")
 
 
     return HttpResponse("It was sent %s")
 
+
 def home(request):
     return render_to_response('temo/load_charts.html', {'variable': 'world'})
+
 
 class ChartData(APIView):
     authentication_classes = []
@@ -126,6 +112,7 @@ class ChartData(APIView):
                 }
 
         return Response(data)
+
 
 class OutsideTempChartData(APIView):
     authentication_classes = []
