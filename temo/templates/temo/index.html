@@ -83,18 +83,11 @@
           </tr>
           </thead>
           <tbody>
-          <!--{% for reading in latest_readings %}-->
-          <!--<tr>-->
-            <!--<td>{{reading.read_date.date|date:"d.m.Y  H:i:s"}}</td>-->
-            <!--<td>{{reading.sensor}}</td>-->
-            <!--<td>{{reading.value}} {{reading.sensor.unit}}</td>-->
-          <!--</tr>-->
-          <!--{%endfor%}-->
-           {% for data in live_data %}
+           {% for reading in readings %}
           <tr>
-            <td>{{data_time|date:"d.m.Y  H:i:s"}} </td>
-            <td>{{data.1}} </td>
-            <td>{{data.0}} {{data.2}}</td>
+            <td>{{time|date:"d.m.Y  H:i:s"}} </td>
+            <td>{{reading.sensor_name}} </td>
+            <td>{{reading.value}} {{reading.unit}}</td>
           </tr>
           {%endfor%}
           </tbody>

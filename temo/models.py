@@ -50,8 +50,3 @@ class Reading(models.Model):
 
 
         return super(Reading, self).save(*args, **kwargs)
-
-class MonthlyWeatherByCity(models.Model):
-    month = models.IntegerField()
-    boston_temp = models.DecimalField(max_digits=5, decimal_places=1)
-    houston_temp = models.DecimalField(max_digits=5, decimal_places=1)

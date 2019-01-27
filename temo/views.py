@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from .models import Reading, Sensor, ReadDate, MonthlyWeatherByCity
+from .models import Reading, Sensor, ReadDate
 from django.utils import timezone
 import datetime
 
@@ -17,9 +17,15 @@ from django.db.models import F
 from django.db.models import Q
 
 LAST_READINGS = []
-LIVE_DATA = []
+LIVE_DATA = [None]
 SENSOR_NAME = ['Temperatura pieca', 'Temperatura boilera', 'Temperatura zewnetrzna', 'Temperatura salon']
 SENSOR_UNIT = ['C', 'C', 'C', 'C']
+readings_bufor = []
+
+sensor_names = {sensor.id: sensor.name for sensor in Sensor.objects.all()}
+sensor_units = {sensor.id: str(sensor.unit) for sensor in Sensor.objects.all()}
+
+print(sensor_units)
 
 from django import template
 register = template.Library()
@@ -31,51 +37,56 @@ def on_click(request):
 
 
 def index(request):
-    latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
-    context = {'latest_readings': latest_readings, 'live_data': LIVE_DATA[-1], 'data_time': timezone.now()}
-    return render(request, 'temo/index.html', context)
+    # # latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
+    # context = {
+    #     'live_data': LIVE_DATA[-1],
+    #     'data_time': timezone.now()
+    # }
+    return render(request, 'temo/index.html', readings_bufor[-1])
+
 
 def test_index(request):
     latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
     context = {'latest_readings': latest_readings, 'live_data': LIVE_DATA[-1], 'data_time': timezone.now()}
     return render(request, 'temo/test.html', context)
 
+
 def write(request):
     id_list = request.POST.getlist('sensor_id')
     value_list = request.POST.getlist('value')
     zip_list = zip(id_list, value_list)
-    # LAST_READINGS.append(value_list)
 
-    LIVE_DATA.append(zip(value_list, SENSOR_NAME, SENSOR_UNIT))
-    # update = False
-    # for last, new in zip(LAST_READINGS[0], value_list):
-    #     if last != new:
-    #         update = True
-    #         break
+    bufor_dict = {
+        'time': timezone.now(),
+        'readings': [
+            {'sensor_name': sensor_names[int(_id)],
+             'value': val,
+             'unit': sensor_units[int(_id)]} for _id, val in zip_list
+        ]
+    }
+    readings_bufor.append(bufor_dict)
 
-    # if not update:
-    #     read_date = ReadDate.objects.order_by('-date')[0]
-    #     read_date.date = timezone.now()
-    #     read_date.save()
-    #     print(read_date.date, read_date.id)
-    # else:
-    #     for id, val in zip_list:
-    #         sensor = Sensor.objects.get(id=id)
-    #         Reading.objects.create(sensor=sensor, value=val)
-    #         # Unit.objects.create(unit="%")
-    # if LAST_READINGS.__len__() > 1:
-    #     LAST_READINGS.pop(0)
+    if len(readings_bufor) > 301:
+        readings_bufor.pop(0)
 
-    if LIVE_DATA.__len__() > 10:
-        LIVE_DATA.pop(0)
-
-    read_date_dict = ReadDate.objects.order_by('-date').values()[0]
-    if timezone.now() - datetime.timedelta(minutes=5) >= read_date_dict['date']:
-        for id, val in zip_list:
+    if readings_bufor[-1]['time'] - datetime.timedelta(minutes=5) > readings_bufor[0]['time']:
+        for id, val in zip_list:  # refactor is needed
             sensor = Sensor.objects.get(id=id)
             Reading.objects.create(sensor=sensor, value=val)
         print('zapisalem do bazy')
-            # Unit.objects.create(unit="%")
+
+    # LIVE_DATA.append(zip(value_list, SENSOR_NAME, SENSOR_UNIT))
+    #
+    # if len(LIVE_DATA) > 10:
+    #     LIVE_DATA.pop(0)
+    #
+    # read_date_dict = ReadDate.objects.order_by('-date').values()[0]
+    # if timezone.now() - datetime.timedelta(minutes=5) >= read_date_dict['date']:
+    #     for id, val in zip_list:
+    #         sensor = Sensor.objects.get(id=id)
+    #         Reading.objects.create(sensor=sensor, value=val)
+    #     print('zapisalem do bazy')
+    #         # Unit.objects.create(unit="%")
 
 
     return HttpResponse("It was sent %s")
