@@ -45,7 +45,7 @@ def index(request):
     try:
         context = readings_bufor[-1]
     except:
-        pass
+        context = None
     return render(request, 'temo/index.html', context)
 
 
