@@ -1,25 +1,17 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 
 from .models import Reading, Sensor, ReadDate
 from django.utils import timezone
 import datetime
 
-from django.http import Http404
-from django.shortcuts import get_object_or_404, render, render_to_response
-from chartit import DataPool, Chart
+from django.shortcuts import render, render_to_response
 
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import authentication, permissions
-from django.db.models import F
 from django.db.models import Q
 
 LAST_READINGS = []
-LIVE_DATA = [None]
-SENSOR_NAME = ['Temperatura pieca', 'Temperatura boilera', 'Temperatura zewnetrzna', 'Temperatura salon']
-SENSOR_UNIT = ['C', 'C', 'C', 'C']
 readings_bufor = []
 
 sensor_names = {sensor.id: sensor.name for sensor in Sensor.objects.all()}
@@ -36,46 +28,44 @@ def on_click(request):
     return HttpResponse("It was click")
 
 
+def _prepare_index_context():
+    if readings_bufor:
+        last_write = readings_bufor[-1]
+        return {
+            'time': last_write['time'],
+            'readings': [{
+                'sensor_name': sensor_names[reading['id']],
+                'value': reading['value'],
+                'unit': sensor_units[reading['id']]} for reading in last_write['readings']]
+        }
+    else:
+        return None
+
+
 def index(request):
-    try:
-        context = readings_bufor[-1]
-    except:
-        context = None
-    return render(request, 'temo/index.html', context)
+    return render(request, 'temo/index.html', _prepare_index_context())
 
 
 def test_index(request):
-    latest_readings = Reading.objects.order_by('-read_date')[:4]  # order_by('-pub_date')[:5]
-    context = {'latest_readings': latest_readings, 'live_data': LIVE_DATA[-1], 'data_time': timezone.now()}
-    return render(request, 'temo/test.html', context)
+    return render(request, 'temo/index.html', _prepare_index_context())
 
 
 def write(request):
-    id_list = request.POST.getlist('sensor_id')
-    value_list = request.POST.getlist('value')
-    zip_list = zip(id_list, value_list)
+    zip_list = zip(request.POST.getlist('sensor_id'), request.POST.getlist('value'))
 
-    bufor_dict = {
+    buffor_dict = {
         'time': timezone.now(),
-        'readings': [
-            {'sensor_name': sensor_names[int(_id)],
-             'value': val,
-             'unit': sensor_units[int(_id)]} for _id, val in zip_list
-        ]
+        'readings': [{'id': int(_id), 'value': val} for _id, val in zip_list]
     }
-    readings_bufor.append(bufor_dict)
+    readings_bufor.append(buffor_dict)
 
     if len(readings_bufor) > 301:
         readings_bufor.pop(0)
 
     if readings_bufor and readings_bufor[-1]['time'] - datetime.timedelta(minutes=5) > last_write_db_time[0]:
-        for reading in readings_bufor[-1]['readings']:  # refactor is needed
-            id = [key for key, value in sensor_names.items() if value == reading['sensor_name']][0]
-            sensor = Sensor.objects.get(id=id)
-            print('sensor', sensor)
-            r = Reading.objects.create(sensor=sensor, value=reading['value'])
-            print(r)
-        print('zapisalem do bazy')
+        for reading in readings_bufor[-1]['readings']:
+            sensor = Sensor.objects.get(id=reading['id'])
+            Reading.objects.create(sensor=sensor, value=reading['value'])
         last_write_db_time.append(timezone.now())
         last_write_db_time.pop(0)
 
@@ -92,11 +82,9 @@ class ChartData(APIView):
     permission_classes = []
 
     def get(self, request, format=None):
-        # reading = Reading.objects.values_list('read_date', 'value').filter(sensor_id=2).order_by('-read_date')[:7]
-        outside_temp = Reading.objects.filter(sensor_id=1).order_by('-read_date').values()[:300:8]
-        # print(outside_temp)
-        heater_temp = Reading.objects.filter(sensor_id=2).order_by('-read_date').values()[:300:8]
-        boiler_temp = Reading.objects.filter(sensor_id=3).order_by('-read_date').values()[:300:8]
+        outside_temp = Reading.objects.filter(sensor_id=2).order_by('-read_date').values()[:300:8]
+        heater_temp = Reading.objects.filter(sensor_id=3).order_by('-read_date').values()[:300:8]
+        boiler_temp = Reading.objects.filter(sensor_id=4).order_by('-read_date').values()[:300:8]
 
         outside_temp_list = []
         heater_temp_list = []
