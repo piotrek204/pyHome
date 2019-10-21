@@ -4,7 +4,7 @@ Django==2.0.1
 django-chartit==0.2.9
 django-chartjs==1.2
 django-jquery==3.1.0
-djangorestframework==3.7.7
+djangorestframework==3.9.1
 flake8==3.5.0
 idna==2.6
 mccabe==0.6.1
@@ -21,7 +21,7 @@ six==1.11.0
 urllib3==1.22
 virtualenv==15.1.0
 virtualenv-clone==0.2.6
-djangorestframework==3.7.7
+djangorestframework==3.9.1
 django-bootstrap3==9.1.0
 django-chartit==0.2.9
 chartjs==1.2
